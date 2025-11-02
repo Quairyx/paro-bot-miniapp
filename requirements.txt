@@ -1,0 +1,13 @@
+# Telegram Bot
+aiogram==2.25.1
+
+# Web App
+Flask==2.3.3
+python-dotenv==1.0.0
+gunicorn==21.2.0
+
+# Database
+sqlite3  # Вбудований в Python
+
+# Optional for deployment
+requests==2.31.0

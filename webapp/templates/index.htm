@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paro Store</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 20px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .header h1 {
+            color: var(--tg-theme-button-color, #2481cc);
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            color: var(--tg-theme-hint-color, #999);
+            font-size: 14px;
+        }
+
+        /* Навигация */
+        .nav-tabs {
+            display: flex;
+            background: var(--tg-theme-secondary-bg-color, #f1f3f4);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px 16px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--tg-theme-hint-color, #666);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-tab.active {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            box-shadow: 0 2px 8px rgba(36, 129, 204, 0.3);
+        }
+
+        /* Секции */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Языковые кнопки */
+        .language-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--tg-theme-button-color, #2481cc);
+            background: transparent;
+            color: var(--tg-theme-button-color, #2481cc);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        /* Карточки товаров */
+        .categories-grid,
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .category-card,
+        .product-card {
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card:hover,
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .product-name,
+        .category-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        .product-description {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #666);
+            margin-bottom: 12px;
+            line-height: 1.4;
+            display: -webkit-box;
+            /*-webkit-line-clamp: 2; */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-price {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #2481cc);
+            margin-bottom: 12px;
+        }
+
+        /* Кнопки */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 5px 0;
+        }
+
+        .btn-primary {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .btn-secondary {
+            background: var(--tg-theme-secondary-bg-color, #f1f3f4);
+            color: var(--tg-theme-text-color, #000);
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 12px;
+            width: auto;
+        }
+
+        /* Корзина */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .cart-item-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 12px;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .cart-item-price {
+            color: var(--tg-theme-button-color, #2481cc);
+            font-weight: 600;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--tg-theme-button-color, #2481cc);
+            background: transparent;
+            color: var(--tg-theme-button-color, #2481cc);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantity-btn:hover {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .quantity-display {
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Итого */
+        .total-section {
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .total-row.final {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #2481cc);
+            border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        /* Формы */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color, #000);
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 12px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000);
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px;
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--tg-theme-bg-color, #ffffff);
+        }
+
+        .radio-option.selected {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border-color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        /* Хлебные крошки */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #666);
+        }
+
+        .breadcrumb-item {
+            cursor: pointer;
+            color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        .breadcrumb-separator {
+            margin: 0 8px;
+        }
+
+        /* Загрузка */
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--tg-theme-hint-color, #666);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 16px;
+            border: 3px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-top: 3px solid var(--tg-theme-button-color, #2481cc);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--tg-theme-hint-color, #666);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Счетчик в корзине */
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .categories-grid,
+            .products-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            
+            .product-image {
+                height: 100px;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+            }
+            
+            .radio-option {
+                min-width: auto;
+            }
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--tg-theme-bg-color, #ffffff);
+            padding: 20px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--tg-theme-hint-color, #666);
+        }
+
+        /* Стилизация под Telegram */
+        .telegram-style {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Скрытие элементов */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Кастомные селекты */
+        .custom-select {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .select-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--tg-theme-bg-color, #ffffff);
+            border: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .select-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .select-option:hover {
+            background: var(--tg-theme-secondary-bg-color, #f8f9fa);
+        }
+
+        .select-option.selected {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Заголовок -->
+        <div class="header">
+            <h1 id="app-title">💨 Paro Store</h1>
+            <div class="subtitle" id="app-subtitle">Найкращі рідини для вейпінгу</div>
+        </div>
+
+        <!-- Селектор языка -->
+        <div class="language-selector">
+            <button class="lang-btn active" data-lang="uk">🇺🇦 UA</button>
+            <button class="lang-btn" data-lang="en">🇵🇱 PL</button>
+            <button class="lang-btn" data-lang="ru">🇷🇺 RU</button>
+        </div>
+
+        <!-- Навигация -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="categories" id="tab-categories">📦 Категорії</button>
+            <button class="nav-tab" data-tab="cart" id="tab-cart">
+                🛒 Кошик
+                <span class="cart-badge hidden" id="cart-badge">0</span>
+            </button>
+        </div>
+
+        <!-- Хлебные крошки -->
+        <div class="breadcrumb hidden" id="breadcrumb">
+            <span class="breadcrumb-item" data-action="categories" id="breadcrumb-categories">Категорії</span>
+            <span class="breadcrumb-separator">></span>
+            <span id="breadcrumb-current">Товари</span>
+        </div>
+
+        <!-- Секция категорий -->
+        <div class="section active" id="section-categories">
+            <div class="loading" id="categories-loading">
+                <div class="spinner"></div>
+                <div id="loading-text">Завантаження...</div>
+            </div>
+            <div class="categories-grid" id="categories-grid"></div>
+        </div>
+
+        <!-- Секция товаров -->
+        <div class="section" id="section-products">
+            <div class="loading hidden" id="products-loading">
+                <div class="spinner"></div>
+                <div>Завантаження товарів...</div>
+            </div>
+            <div class="products-grid" id="products-grid"></div>
+            <button class="btn btn-secondary hidden" id="back-to-categories">⬅️ Назад до категорій</button>
+        </div>
+
+        <!-- Секция корзины -->
+        <div class="section" id="section-cart">
+            <div class="empty-state" id="empty-cart">
+                <div class="empty-icon">🛒</div>
+                <div id="empty-cart-text">Кошик порожній</div>
+                <p>Додайте товари для оформлення замовлення</p>
+            </div>
+            
+            <div class="hidden" id="cart-content">
+                <div id="cart-items"></div>
+                
+                <div class="total-section">
+                    <div class="total-row">
+                        <span id="subtotal-label">Сума товарів:</span>
+                        <span id="subtotal-amount">0 zł</span>
+                    </div>
+                    <div class="total-row">
+                        <span id="delivery-label">Доставка:</span>
+                        <span id="delivery-amount">0 zł</span>
+                    </div>
+                    <div class="total-row final">
+                        <span id="total-label">Всього:</span>
+                        <span id="total-amount">0 zł</span>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" id="checkout-btn">🛍️ Оформити замовлення</button>
+                <button class="btn btn-secondary" id="clear-cart-btn">🗑️ Очистити кошик</button>
+            </div>
+        </div>
+
+        <!-- Секция оформления заказа -->
+        <div class="section" id="section-checkout">
+            <h2 id="checkout-title">Оформлення замовлення</h2>
+            
+            <form id="checkout-form">
+                <div class="form-group">
+                    <label class="form-label" for="customer-name" id="label-name">Ваше ім'я *</label>
+                    <input type="text" class="form-input" id="customer-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="customer-contact" id="label-contact">Контакт (Telegram або телефон) *</label>
+                    <input type="text" class="form-input" id="customer-contact" placeholder="@username або +48123456789" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" id="label-delivery">Спосіб доставки *</label>
+                    <div class="radio-group">
+                        <div class="radio-option" data-delivery="pickup">
+                            <div>🏪 <span id="delivery-pickup">Самовивіз</span></div>
+                        </div>
+                        <div class="radio-option" data-delivery="post">
+                            <div>📦 <span id="delivery-post">Поштомат</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Поля для самовывоза -->
+                <div class="form-group hidden" id="pickup-fields">
+                    <label class="form-label" for="pickup-info" id="label-pickup-info">Місце та дата самовивозу *</label>
+                    <input type="text" class="form-input" id="pickup-info" placeholder="Наприклад: Wittchen, завтра 15:00">
+                </div>
+                
+                <!-- Поля для почтомата -->
+                <div class="hidden" id="post-fields">
+                    <div class="form-group">
+                        <label class="form-label" for="post-name" id="label-post-name">Прізвище та ім'я (латиницею) *</label>
+                        <input type="text" class="form-input" id="post-name" placeholder="Jan Kowalski">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="post-phone" id="label-post-phone">Номер телефону *</label>
+                        <input type="tel" class="form-input" id="post-phone" placeholder="+48123456789">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="post-email" id="label-post-email">Email *</label>
+                        <input type="email" class="form-input" id="post-email" placeholder="example@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="post-address" id="label-post-address">Адреса поштомату *</label>
+                        <input type="text" class="form-input" id="post-address" placeholder="ul. Przykładowa 123, 00-000 Warszawa">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" id="label-payment">Спосіб оплати *</label>
+                    <div class="radio-group">
+                        <div class="radio-option" data-payment="cash">
+                            <div>💵 <span id="payment-cash">Готівка</span></div>
+                        </div>
+                        <div class="radio-option" data-payment="card">
+                            <div>💳 <span id="payment-card">Карта</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="total-section">
+                    <div class="total-row final">
+                        <span id="checkout-total-label">Сума до оплати:</span>
+                        <span id="checkout-total-amount">0 zł</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="submit-order">✅ Підтвердити замовлення</button>
+                <button type="button" class="btn btn-secondary" id="back-to-cart">⬅️ Назад до кошика</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно успеха -->
+    <div class="modal" id="success-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="success-title">✅ Замовлення прийняте!</h3>
+                <button class="close-btn" id="close-success">&times;</button>
+            </div>
+            <div id="success-message">
+                <p>Ваше замовлення успішно оформлено!</p>
+                <p>Адміністратор зв'яжеться з вами найближчим часом.</p>
+            </div>
+            <button class="btn btn-primary" id="new-order">🛍️ Нове замовлення</button>
+        </div>
+    </div>
+
+    <script>
+        // Telegram Web App API
+        const tg = window.Telegram.WebApp;
+        
+        // Настройка Telegram WebApp
+        tg.expand();
+        tg.ready();
+        
+        // Получение пользователя
+        const user = tg.initDataUnsafe?.user;
+        const userId = user?.id;
+        
+        // Переменные приложения
+        let currentLang = 'uk';
+        let translations = {};
+        let cart = JSON.parse(localStorage.getItem('paro_cart') || '[]');
+        let categories = [];
+        let currentCategory = null;
+        let selectedDelivery = null;
+        let selectedPayment = null;
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadTranslations();
+            updateCartBadge();
+            setupEventListeners();
+            await loadCategories();
+            
+            // Показать главную кнопку Telegram
+            tg.MainButton.text = translations.catalog || "Каталог";
+            tg.MainButton.show();
+            
+            // Установить цвета темы
+            document.body.style.backgroundColor = tg.themeParams.bg_color || '#ffffff';
+            document.body.style.color = tg.themeParams.text_color || '#000000';
+        });
+        
+        // Загрузка переводов
+        async function loadTranslations() {
+            try {
+                const response = await fetch(`/api/translations?lang=${currentLang}`);
+                translations = await response.json();
+                updateUITexts();
+            } catch (error) {
+                console.error('Error loading translations:', error);
+            }
+        }
+        
+        // Обновление текстов интерфейса
+        function updateUITexts() {
+            // Обновляем все текстовые элементы
+            const elements = {
+                'tab-categories': translations.categories || 'Категорії',
+                'tab-cart': `🛒 ${translations.cart || 'Кошик'}`,
+                'loading-text': translations.loading || 'Завантаження...',
+                'empty-cart-text': translations.empty_cart || 'Кошик порожній',
+                'checkout-title': translations.checkout || 'Оформити замовлення',
+                'label-name': translations.name || "Ваше ім'я *",
+                'label-contact': translations.contact || 'Контакт *',
+                'label-delivery': translations.delivery || 'Спосіб доставки *',
+                'delivery-pickup': translations.pickup || 'Самовивіз',
+                'delivery-post': translations.post || 'Поштомат',
+                'label-payment': translations.payment || 'Спосіб оплати *',
+                'payment-cash': translations.cash || 'Готівка',
+                'payment-card': translations.card || 'Карта',
+                'submit-order': `✅ ${translations.checkout || 'Підтвердити замовлення'}`,
+                'back-to-cart': `⬅️ ${translations.back || 'Назад'} до кошика`,
+                'back-to-categories': `⬅️ ${translations.back || 'Назад'} до категорій`,
+                'checkout-btn': `🛍️ ${translations.checkout || 'Оформити замовлення'}`,
+                'clear-cart-btn': `🗑️ Очистити кошик`,
+                'breadcrumb-categories': translations.categories || 'Категорії',
+                'subtotal-label': 'Сума товарів:',
+                'delivery-label': 'Доставка:',
+                'total-label': translations.total || 'Всього:',
+                'checkout-total-label': 'Сума до оплати:',
+                'success-title': `✅ ${translations.order_success || 'Замовлення прийняте!'}`,
+                'new-order': '🛍️ Нове замовлення'
+            };
+            
+            Object.entries(elements).forEach(([id, text]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = text;
+                }
+            });
+            
+            // Обновляем плейсхолдеры
+            const placeholders = {
+                'customer-contact': '@username або +48123456789',
+                'pickup-info': 'Наприклад: Wittchen, завтра 15:00',
+                'post-name': 'Jan Kowalski',
+                'post-phone': '+48123456789',
+                'post-email': 'example@email.com',
+                'post-address': 'ul. Przykładowa 123, 00-000 Warszawa'
+            };
+            
+            Object.entries(placeholders).forEach(([id, placeholder]) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.placeholder = placeholder;
+                }
+            });
+        }
+        
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Языковые кнопки
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => changeLanguage(btn.dataset.lang));
+            });
+            
+            // Навигация
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+            
+            // Кнопки навигации
+            document.getElementById('back-to-categories').addEventListener('click', showCategories);
+            document.getElementById('back-to-cart').addEventListener('click', () => switchTab('cart'));
+            document.getElementById('checkout-btn').addEventListener('click', () => switchTab('checkout'));
+            document.getElementById('clear-cart-btn').addEventListener('click', clearCart);
+            
+            // Хлебные крошки
+            document.getElementById('breadcrumb-categories').addEventListener('click', showCategories);
+            
+            // Формы
+            document.getElementById('checkout-form').addEventListener('submit', submitOrder);
+            
+            // Способы доставки
+            document.querySelectorAll('[data-delivery]').forEach(option => {
+                option.addEventListener('click', () => selectDelivery(option.dataset.delivery));
+            });
+            
+            // Способы оплаты
+            document.querySelectorAll('[data-payment]').forEach(option => {
+                option.addEventListener('click', () => selectPayment(option.dataset.payment));
+            });
+            
+            // Модальные окна
+            document.getElementById('close-success').addEventListener('click', closeSuccessModal);
+            document.getElementById('new-order').addEventListener('click', newOrder);
+        }
+        
+        // Смена языка
+        async function changeLanguage(lang) {
+            currentLang = lang;
+            
+            // Обновляем активную кнопку
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            
+            await loadTranslations();
+            await loadCategories();
+            
+            // Если показаны товары, перезагружаем их
+            if (currentCategory) {
+                await loadProducts(currentCategory);
+            }
+        }
+        
+        // Переключение вкладок
+        function switchTab(tabName) {
+            // Обновляем активную вкладку
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
+            });
+            
+            // Показываем нужную секцию
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.toggle('active', section.id === `section-${tabName}`);
+            });
+            
+            // Обновляем хлебные крошки
+            const breadcrumb = document.getElementById('breadcrumb');
+            if (tabName === 'products' && currentCategory) {
+                breadcrumb.classList.remove('hidden');
+            } else {
+                breadcrumb.classList.add('hidden');
+            }
+            
+            // Обновляем корзину при переходе
+            if (tabName === 'cart') {
+                updateCartDisplay();
+            }
+            
+            // Обновляем итого при переходе к оформлению
+            if (tabName === 'checkout') {
+                updateCheckoutTotal();
+            }
+        }
+        
+        // Загрузка категорий
+        async function loadCategories() {
+            const loading = document.getElementById('categories-loading');
+            const grid = document.getElementById('categories-grid');
+            
+            loading.style.display = 'block';
+            grid.innerHTML = '';
+            
+            try {
+                const response = await fetch(`/api/categories?lang=${currentLang}`);
+                categories = await response.json();
+                
+                categories.forEach(category => {
+                    const card = createCategoryCard(category);
+                    grid.appendChild(card);
+                });
+                
+                loading.style.display = 'none';
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                loading.innerHTML = '<div>Помилка завантаження</div>';
+            }
+        }
+        
+        // Создание карточки категории
+        function createCategoryCard(category) {
+            const card = document.createElement('div');
+            card.className = 'category-card';
+            card.innerHTML = `
+                <div class="category-name">${category.name}</div>
+            `;
+            
+            card.addEventListener('click', () => {
+                currentCategory = category;
+                loadProducts(category.id);
+                switchTab('products');
+                
+                // Обновляем хлебные крошки
+                document.getElementById('breadcrumb-current').textContent = category.name;
+            });
+            
+            return card;
+        }
+        
+        // Загрузка товаров
+        async function loadProducts(categoryId) {
+            const loading = document.getElementById('products-loading');
+            const grid = document.getElementById('products-grid');
+            const backBtn = document.getElementById('back-to-categories');
+            
+            loading.classList.remove('hidden');
+            grid.innerHTML = '';
+            backBtn.classList.add('hidden');
+            
+            try {
+                const response = await fetch(`/api/products/${categoryId}?lang=${currentLang}`);
+                const products = await response.json();
+                
+                products.forEach(product => {
+                    const card = createProductCard(product);
+                    grid.appendChild(card);
+                });
+                
+                loading.classList.add('hidden');
+                backBtn.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading products:', error);
+                loading.innerHTML = '<div>Помилка завантаження товарів</div>';
+            }
+        }
+        
+        // Создание карточки товара
+        function createProductCard(product) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            
+            // Проверяем наличие в корзине
+            const cartItem = cart.find(item => item.product_id === product.id);
+            const inCartQuantity = cartItem ? cartItem.quantity : 0;
+            
+            card.innerHTML = `
+                ${product.photo_url ? `<img src="${product.photo_url}" alt="${product.name}" class="product-image">` : ''}
+                <div class="product-name">${product.name}</div>
+                <div class="product-description">${product.description}</div>
+                <div class="product-price">${product.price} zł</div>
+                <button class="btn btn-primary btn-small" data-product-id="${product.id}">
+                    ${inCartQuantity > 0 ? `В кошику (${inCartQuantity})` : (translations.add_to_cart || 'Додати до кошика')}
+                </button>
+            `;
+            
+            // Обработчик добавления в корзину
+            const addBtn = card.querySelector('button');
+            addBtn.addEventListener('click', () => addToCart(product));
+            
+            return card;
+        }
+        
+        // Добавление в корзину
+        function addToCart(product) {
+            const existingItem = cart.find(item => item.product_id === product.id);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    product_id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    photo_url: product.photo_url,
+                    quantity: 1
+                });
+            }
+            
+            saveCart();
+            updateCartBadge();
+            
+            // Обновляем кнопку товара
+            const btn = document.querySelector(`[data-product-id="${product.id}"]`);
+            if (btn) {
+                const quantity = cart.find(item => item.product_id === product.id).quantity;
+                btn.textContent = `В кошику (${quantity})`;
+            }
+            
+            // Telegram haptic feedback
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        }
+        
+        // Сохранение корзины
+        function saveCart() {
+            localStorage.setItem('paro_cart', JSON.stringify(cart));
+        }
+        
+        // Обновление счетчика корзины
+        function updateCartBadge() {
+            const badge = document.getElementById('cart-badge');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            if (totalItems > 0) {
+                badge.textContent = totalItems;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+        
+        // Обновление отображения корзины
+        function updateCartDisplay() {
+            const emptyCart = document.getElementById('empty-cart');
+            const cartContent = document.getElementById('cart-content');
+            const cartItems = document.getElementById('cart-items');
+            
+            if (cart.length === 0) {
+                emptyCart.classList.remove('hidden');
+                cartContent.classList.add('hidden');
+                return;
+            }
+            
+            emptyCart.classList.add('hidden');
+            cartContent.classList.remove('hidden');
+            
+            // Очищаем список товаров
+            cartItems.innerHTML = '';
+            
+            let subtotal = 0;
+            
+            cart.forEach(item => {
+                const cartItem = createCartItem(item);
+                cartItems.appendChild(cartItem);
+                subtotal += item.price * item.quantity;
+            });
+            
+            // Обновляем итого
+            document.getElementById('subtotal-amount').textContent = `${subtotal} zł`;
+            
+            // Доставка (только для поштомата)
+            const deliveryFee = selectedDelivery === 'post' ? 12 : 0;
+            document.getElementById('delivery-amount').textContent = `${deliveryFee} zł`;
+            
+            const total = subtotal + deliveryFee;
+            document.getElementById('total-amount').textContent = `${total} zł`;
+        }
+        
+        // Создание элемента корзины
+        function createCartItem(item) {
+            const cartItem = document.createElement('div');
+            cartItem.className = 'cart-item';
+            
+            cartItem.innerHTML = `
+                ${item.photo_url ? `<img src="${item.photo_url}" alt="${item.name}" class="cart-item-image">` : ''}
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${item.name}</div>
+                    <div class="cart-item-price">${item.price} zł × ${item.quantity} = ${item.price * item.quantity} zł</div>
+                </div>
+                <div class="quantity-controls">
+                    <button class="quantity-btn" data-action="decrease" data-product-id="${item.product_id}">−</button>
+                    <span class="quantity-display">${item.quantity}</span>
+                    <button class="quantity-btn" data-action="increase" data-product-id="${item.product_id}">+</button>
+                </div>
+            `;
+            
+            // Обработчики изменения количества
+            cartItem.querySelectorAll('.quantity-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const productId = parseInt(btn.dataset.productId);
+                    const action = btn.dataset.action;
+                    updateCartItemQuantity(productId, action);
+                });
+            });
+            
+            return cartItem;
+        }
+        
+        // Изменение количества товара в корзине
+        function updateCartItemQuantity(productId, action) {
+            const itemIndex = cart.findIndex(item => item.product_id === productId);
+            
+            if (itemIndex === -1) return;
+            
+            if (action === 'increase') {
+                cart[itemIndex].quantity += 1;
+            } else if (action === 'decrease') {
+                cart[itemIndex].quantity -= 1;
+                
+                if (cart[itemIndex].quantity <= 0) {
+                    cart.splice(itemIndex, 1);
+                }
+            }
+            
+            saveCart();
+            updateCartBadge();
+            updateCartDisplay();
+        }
+        
+        // Очистка корзины
+        function clearCart() {
+            if (confirm('Ви впевнені, що хочете очистити кошик?')) {
+                cart = [];
+                saveCart();
+                updateCartBadge();
+                updateCartDisplay();
+            }
+        }
+        
+        // Показать категории
+        function showCategories() {
+            currentCategory = null;
+            switchTab('categories');
+        }
+        
+        // Выбор способа доставки
+        function selectDelivery(delivery) {
+            selectedDelivery = delivery;
+            
+            // Обновляем активную опцию
+            document.querySelectorAll('[data-delivery]').forEach(option => {
+                option.classList.toggle('selected', option.dataset.delivery === delivery);
+            });
+            
+            // Показываем/скрываем поля
+            const pickupFields = document.getElementById('pickup-fields');
+            const postFields = document.getElementById('post-fields');
+            
+            if (delivery === 'pickup') {
+                pickupFields.classList.remove('hidden');
+                postFields.classList.add('hidden');
+                
+                // Ограничиваем способы оплаты
+                document.querySelectorAll('[data-payment]').forEach(option => {
+                    option.style.display = 'block';
+                });
+            } else if (delivery === 'post') {
+                pickupFields.classList.add('hidden');
+                postFields.classList.remove('hidden');
+                
+                // Только карта для поштомата
+                document.querySelectorAll('[data-payment]').forEach(option => {
+                    if (option.dataset.payment === 'card') {
+                        option.style.display = 'block';
+                        option.click(); // Автоматически выбираем карту
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+            }
+            
+            updateCheckoutTotal();
+        }
+        
+        // Выбор способа оплаты
+        function selectPayment(payment) {
+            selectedPayment = payment;
+            
+            // Обновляем активную опцию
+            document.querySelectorAll('[data-payment]').forEach(option => {
+                option.classList.toggle('selected', option.dataset.payment === payment);
+            });
+        }
+        
+        // Обновление итого в оформлении
+        function updateCheckoutTotal() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryFee = selectedDelivery === 'post' ? 12 : 0;
+            const total = subtotal + deliveryFee;
+            
+            document.getElementById('checkout-total-amount').textContent = `${total} zł`;
+        }
+        
+        // Отправка заказа
+        async function submitOrder(e) {
+            e.preventDefault();
+            
+            if (!userId) {
+                alert('Помилка: не вдалося отримати ID користувача');
+                return;
+            }
+            
+            if (cart.length === 0) {
+                alert(translations.empty_cart || 'Кошик порожній');
+                return;
+            }
+            
+            // Собираем данные формы
+            const formData = {
+                user_id: userId,
+                full_name: document.getElementById('customer-name').value,
+                contact: document.getElementById('customer-contact').value,
+                delivery: selectedDelivery,
+                payment_method: selectedPayment,
+                cart: cart,
+                lang: currentLang
+            };
+            
+            // Добавляем данные доставки
+            if (selectedDelivery === 'pickup') {
+                formData.delivery_info = `Самовивіз\nДата: ${document.getElementById('pickup-info').value}`;
+            } else if (selectedDelivery === 'post') {
+                formData.delivery_info = `Поштомат\nІм'я: ${document.getElementById('post-name').value}\nТелефон: ${document.getElementById('post-phone').value}\nEmail: ${document.getElementById('post-email').value}\nАдреса: ${document.getElementById('post-address').value}`;
+            }
+            
+            // Валидация
+            if (!formData.full_name || !formData.contact || !selectedDelivery || !selectedPayment) {
+                alert('Заповніть всі обов\'язкові поля');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Очищаем корзину
+                    cart = [];
+                    saveCart();
+                    updateCartBadge();
+                    
+                    // Показываем модальное окно успеха
+                    showSuccessModal();
+                    
+                    // Telegram notification
+                    if (tg.showAlert) {
+                        tg.showAlert(translations.order_success || 'Замовлення прийняте!');
+                    }
+                } else {
+                    alert(`Помилка: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error submitting order:', error);
+                alert('Помилка при оформленні замовлення');
+            }
+        }
+        
+        // Показать модальное окно успеха
+        function showSuccessModal() {
+            document.getElementById('success-modal').classList.add('active');
+        }
+        
+        // Закрыть модальное окно успеха
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.remove('active');
+        }
+        
+        // Новый заказ
+        function newOrder() {
+            closeSuccessModal();
+            switchTab('categories');
+            
+            // Очищаем форму
+            document.getElementById('checkout-form').reset();
+            selectedDelivery = null;
+            selectedPayment = null;
+            
+            // Сбрасываем состояние
+            document.querySelectorAll('.radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.getElementById('pickup-fields').classList.add('hidden');
+            document.getElementById('post-fields').classList.add('hidden');
+        }
+        
+        // Telegram Main Button handler
+        tg.onEvent('mainButtonClicked', function() {
+            if (cart.length > 0) {
+                switchTab('cart');
+            } else {
+                switchTab('categories');
+            }
+        });
+        
+        // Telegram Back Button handler
+        tg.onEvent('backButtonClicked', function() {
+            if (document.querySelector('.section.active').id === 'section-products') {
+                showCategories();
+            } else if (document.querySelector('.section.active').id === 'section-checkout') {
+                switchTab('cart');
+            } else {
+                tg.close();
+            }
+        });
+    </script>
+</body>
+</html>
