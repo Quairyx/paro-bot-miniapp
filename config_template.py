@@ -5,7 +5,7 @@ import os
 BOT_TOKEN = os.getenv('BOT_TOKEN', '8137198869:AAHB25nKX6EAf_5A3elSsTWMnsoaK4u8YoU')
 
 # URL для Mini App (замініть на ваш домен)
-WEBAPP_URL = os.getenv('WEBAPP_URL', 'https://your-domain.com')
+WEBAPP_URL = os.getenv('WEBAPP_URL', 'https://quairyx.github.io/paro-bot-miniapp/')
 
 # Адміністратори (ID Telegram)
 ADMINS = {
