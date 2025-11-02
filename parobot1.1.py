@@ -15,7 +15,7 @@ from datetime import datetime, timedelta,timezone
 TOKEN = '8137198869:AAHB25nKX6EAf_5A3elSsTWMnsoaK4u8YoU'
 
 # URL для Mini App (замініть на ваш домен)
-WEBAPP_URL = "https://yourdomain.com"  # Замініть на реальний URL
+WEBAPP_URL = "https://quairyx.github.io/paro-bot-miniapp/"  # Замініть на реальний URL
 
 ADMINS = {664943604,6766894203}
 #ADMINS = {948158971}
