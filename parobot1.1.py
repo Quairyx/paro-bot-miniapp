@@ -11,8 +11,8 @@ from aiogram.types import InputFile
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from datetime import datetime, timedelta,timezone
-TOKEN = '8024597010:AAGf9pAtUJ4lX_CPMI6qxqjhH3MO_zM852I'
-#TOKEN = '8137198869:AAHB25nKX6EAf_5A3elSsTWMnsoaK4u8YoU'
+#TOKEN = '8024597010:AAGf9pAtUJ4lX_CPMI6qxqjhH3MO_zM852I'
+TOKEN = '8137198869:AAHB25nKX6EAf_5A3elSsTWMnsoaK4u8YoU'
 
 # URL для Mini App (замініть на ваш домен)
 WEBAPP_URL = "https://yourdomain.com"  # Замініть на реальний URL
